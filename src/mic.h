@@ -19,22 +19,28 @@
 #define MIC_H_INCLUDED
 
 #include <Arduino.h>
+#include "hardware/dma_adc.h"
+
+#define ADC_BUF_DEFAULT 1600
+
+#ifndef ADC_BUF_SIZE
+#define ADC_BUF_SIZE ADC_BUF_DEFAULT
+#endif
 
 #if !defined(WIO_TERMINAL)
 #error "This library targets only Wio Terminal boards at the moment"
 #endif
 
-/**
- * @brief DMAC descriptor structure
- */
-
 typedef struct {
-    uint16_t btctrl;
-    uint16_t btcnt;
-    uint32_t srcaddr;
-    uint32_t dstaddr;
-    uint32_t descaddr;
-} dmacdescriptor;
+    uint8_t mic_type;
+    uint8_t channel_cnt;
+    uint32_t sampling_rate;
+    uint32_t buf_size;
+
+    Adc* adc_pin;
+    uint8_t debug_pin;
+
+} mic_config_t;
 
 
 class MicClass
@@ -43,28 +49,30 @@ public:
   MicClass();
   virtual ~MicClass();
 
-  int begin(int channels, long sampleRate);
+  int begin(mic_config_t *mic_config);
   void end();
 
   virtual int available();
-  virtual int read(void* buffer, size_t size);
+  virtual int read(void* buffer, uint8_t buf_count, size_t size);
 
   void onReceive(void(*)(uint16_t *buf, uint32_t buf_len));
 
-  void setGain(int gain);
-  void setBufferSize(int bufferSize);
+  void setGain(uint8_t gain);
 
 // private:
   void IrqHandler();
 
 private:
 
-  int _channels;
-  
-  enum {ADC_BUF_LEN = 1600};    // Size of one of the DMA double buffers
+  uint8_t _channel_cnt;
+  uint32_t _sampling_rate;
 
-  uint16_t adc_buf_0[ADC_BUF_LEN];    // ADC results array 0
-  uint16_t adc_buf_1[ADC_BUF_LEN];    // ADC results array 1
+  uint8_t _buf_count = 0;
+  uint8_t _debug_pin;
+  uint8_t _mic_type;
+
+  uint16_t buf_0[ADC_BUF_SIZE];    // ADC results array 0
+  uint16_t buf_1[ADC_BUF_SIZE];    // ADC results array 1
 
   void (*_onReceive)(uint16_t *buf, uint32_t buf_len);
 };

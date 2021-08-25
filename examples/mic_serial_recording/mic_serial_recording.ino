@@ -14,6 +14,7 @@ mic_config_t mic_config{
   .debug_pin = 1                // Toggles each DAC ISR (if DEBUG is set to 1)
 };
 
+
 int16_t recording_buf[SAMPLES];
 volatile uint8_t recording = 0;
 volatile static bool record_ready = false;
@@ -22,43 +23,47 @@ FilterBuHp filter;
 
 void setup() {
 
-  Serial.begin(115200);
+  Serial.begin(57600);
   while (!Serial) {delay(10);}
   
   pinMode(WIO_KEY_A, INPUT_PULLUP);
   
-
   Mic.onReceive(audio_rec_callback);
 
   if (!Mic.begin(&mic_config)) {
-    Serial.println("Failed to start Mic!");
+    Serial.println("init_fail");
     while (1);
   }
 
-  Serial.println("Mic initialization done.");
+  Serial.println("init_ok");
 
 }
 
 void loop() { 
-  
-if (digitalRead(WIO_KEY_A) == LOW && !recording) {
 
-    Serial.println("Starting sampling");
+  String resp = Serial.readString();
+
+if (resp == "init\n" && !recording){
+  Serial.println("init_ok");
+}
+  
+if (resp == "rec\n" && !recording) {
+
     recording = 1;
     record_ready = false;  
 }
 
   if (!recording && record_ready)
   {
-  Serial.println("Finished sampling");
-  
+    
+  Serial.println("rec_ok");
   for (int i = 0; i < SAMPLES; i++) {
     
-  //int16_t sample = filter.step(recording_buf[i]);
-  int16_t sample = recording_buf[i];
-  Serial.println(sample);
+  Serial.println(recording_buf[i]);
+
   }
-  
+
+  Serial.println("fi");
   record_ready = false; 
   }
 }
@@ -66,7 +71,7 @@ if (digitalRead(WIO_KEY_A) == LOW && !recording) {
 static void audio_rec_callback(uint16_t *buf, uint32_t buf_len) {
 
   static uint32_t idx = 0;
-  // Copy samples from DMA buffer to inference buffer
+
   if (recording) {
     for (uint32_t i = 0; i < buf_len; i++) {
   
