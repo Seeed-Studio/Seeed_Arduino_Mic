@@ -6,21 +6,22 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-Mic	KEYWORD1
+DMA_ADC_Class   KEYWORD1
+MicClass        KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
-begin	KEYWORD2
-end	KEYWORD2
+begin	        KEYWORD2
+end             KEYWORD2
 
-available	KEYWORD2
-read	KEYWORD2
+available	    KEYWORD2
+read	        KEYWORD2
 
-onReceive	KEYWORD2
+pause	        KEYWORD2
+resume 	        KEYWORD2
 
-setGain	KEYWORD2
-setBufferSize	KEYWORD2
+set_callback    KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

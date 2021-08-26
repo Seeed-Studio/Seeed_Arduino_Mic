@@ -6,6 +6,7 @@ dmacdescriptor descriptor __attribute__ ((aligned (16)));                       
 
 DMA_ADC_Class::~DMA_ADC_Class()
 {
+  end();
 }
 
 uint8_t DMA_ADC_Class::begin(){
@@ -66,7 +67,19 @@ uint8_t DMA_ADC_Class::begin(){
                                    GCLK_PCHCTRL_GEN_GCLK1;    // Connect generic clock 0 at 48MHz
    
   TC5->COUNT16.WAVE.reg = TC_WAVE_WAVEGEN_MFRQ;               // Set TC5 to Match Frequency (MFRQ) mode
-  TC5->COUNT16.CC[0].reg = _16KHZ;                          // Set the trigger to 16 kHz: (4Mhz / 16000) - 1
+
+  // configure the sample rate
+  switch (_sampling_rate) {
+    case 16000:
+      TC5->COUNT16.CC[0].reg = _16KHZ;                          // Set the trigger to 16 kHz: (48Mhz / 16000) - 1
+      break;
+    case 8000:
+      TC5->COUNT16.CC[0].reg = _8KHZ;                          // Set the trigger to 8 kHz: (48Mhz / 8000) - 1
+      break;
+    default:
+      return 0;   
+  }
+
   while (TC5->COUNT16.SYNCBUSY.bit.CC0);                      // Wait for synchronization
 
   // Start Timer/Counter 5
@@ -92,51 +105,18 @@ void DMA_ADC_Class::resume(){
     NVIC_EnableIRQ(DMAC_1_IRQn);
 }
 
-
-void DMA_ADC_Class::setCallback(void(*function)(uint16_t *buf, uint32_t buf_len)) {
+void DMA_ADC_Class::set_callback(void(*function)(uint16_t *buf, uint32_t buf_len)) {
   _onReceive = function;
 }
-/*
-void DMA_ADC_Class::IrqHandler(){
-  Serial.println("irq");
-  // Check if DMAC channel 1 has been suspended (SUSP)
-  if (DMAC->Channel[1].CHINTFLAG.bit.SUSP) {
 
-     // Debug: make pin high before copying buffer
-    //if (_debug_pin) {
-    //digitalWrite(1, HIGH);
-    //}
-
-    // Restart DMAC on channel 1 and clear SUSP interrupt flag
-    DMAC->Channel[1].CHCTRLB.reg = DMAC_CHCTRLB_CMD_RESUME;
-    DMAC->Channel[1].CHINTFLAG.bit.SUSP = 1;
-
-    // See which buffer has filled up, and dump results into large buffer
-    if (*_buf_count_ptr) {
-      _onReceive(buf_0_ptr, *_buf_size_ptr);
-    } else {
-      _onReceive(buf_1_ptr, *_buf_size_ptr);
-    }
-
-    // Flip to next buffer
-    *_buf_count_ptr = (*_buf_count_ptr + 1) % 2;
-
-    // Debug: make pin low after copying buffer
-    //if (_debug_pin) {
-    digitalWrite(1, LOW);
-    //}
-  }
-}
-*/
 void DMAC_1_Handler() {
-  //Serial.println("irq");
   // Check if DMAC channel 1 has been suspended (SUSP)
   if (DMAC->Channel[1].CHINTFLAG.bit.SUSP) {
 
      // Debug: make pin high before copying buffer
-    //if (_debug_pin) {
-    digitalWrite(1, HIGH);
-    //}
+    if (*DMA_ADC_Class::_debug_pin_ptr) {
+    digitalWrite(*DMA_ADC_Class::_debug_pin_ptr, HIGH);
+    }
 
     // Restart DMAC on channel 1 and clear SUSP interrupt flag
     DMAC->Channel[1].CHCTRLB.reg = DMAC_CHCTRLB_CMD_RESUME;
@@ -153,17 +133,8 @@ void DMAC_1_Handler() {
     *DMA_ADC_Class::_buf_count_ptr = (*DMA_ADC_Class::_buf_count_ptr + 1) % 2;
 
     // Debug: make pin low after copying buffer
-    //if (_debug_pin) {
-    digitalWrite(1, LOW);
-    //}
+    if (*DMA_ADC_Class::_debug_pin_ptr) {
+    digitalWrite(*DMA_ADC_Class::_debug_pin_ptr, LOW);
+    }
   }
 }
-
-//extern "C" {
-//  __attribute__((__used__)) void DMAC_1_Handler(void)
-//  {
-//    DMA_ADC_Class::IrqHandler;
-//  }
-//}
-
-//DMA_ADC_Class DMA_ADC;

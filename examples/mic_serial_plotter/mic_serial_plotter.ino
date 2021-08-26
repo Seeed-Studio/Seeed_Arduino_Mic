@@ -9,7 +9,6 @@ mic_config_t mic_config{
   .channel_cnt = 1,
   .sampling_rate = 16000,
   .buf_size = 1600,
-  .adc_pin = ADC1,
   .debug_pin = 1                // Toggles each DAC ISR (if DEBUG is set to 1)
 };
 
@@ -28,7 +27,7 @@ void setup() {
   
   pinMode(WIO_KEY_A, INPUT_PULLUP);
 
-  Mic.setCallback(audio_rec_callback);
+  Mic.set_callback(audio_rec_callback);
 
   if (!Mic.begin()) {
     Serial.println("Mic initialization failed");

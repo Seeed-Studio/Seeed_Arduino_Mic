@@ -9,7 +9,6 @@ mic_config_t mic_config{
   .channel_cnt = 1,
   .sampling_rate = 16000,
   .buf_size = 320,
-  .adc_pin = ADC1,
   .debug_pin = 1                // Toggles each DAC ISR (if DEBUG is set to 1)
 };
 
@@ -28,7 +27,7 @@ void setup() {
   
   pinMode(WIO_KEY_A, INPUT_PULLUP);
   
-  Mic.setCallback(audio_rec_callback);
+  Mic.set_callback(audio_rec_callback);
 
   if (!Mic.begin()) {
     Serial.println("init_fail");
@@ -76,8 +75,8 @@ static void audio_rec_callback(uint16_t *buf, uint32_t buf_len) {
     for (uint32_t i = 0; i < buf_len; i++) {
   
       // Convert 12-bit unsigned ADC value to 16-bit PCM (signed) audio value
-      recording_buf[idx++] = filter.step((int16_t)(buf[i] - 1024) * 16);
-      //recording_buf[idx++] = (int16_t)(buf[i] - 1024) * 16;  
+      recording_buf[idx++] = filter.step((int16_t)(buf[i] - 1024) * 16);    //with Filter
+      //recording_buf[idx++] = (int16_t)(buf[i] - 1024) * 16;               // without filter
           
       if (idx >= SAMPLES){ 
       idx = 0;

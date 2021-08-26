@@ -19,6 +19,16 @@ typedef struct {
 } dmacdescriptor;
 
 
+
+/**
+ * @brief Initialize the DMA ADC for sound recording
+ *
+ * This is reference implementation of MicClass extension,
+ * it inherits the constructor from MicClass and extends 
+ * begin(), end(), pause(), resume() methods with the 
+ * code applicable to hardware.
+ *
+ */
 class DMA_ADC_Class : public MicClass
 {
 
@@ -30,13 +40,7 @@ public:
     void end();
     void pause();
     void resume();
-    void setCallback(void(*function)(uint16_t *buf, uint32_t buf_len));
-
-    static void IrqHandler();
-
-private:
-
-  uint8_t _channel_cnt;
+    void set_callback(void(*function)(uint16_t *buf, uint32_t buf_len));
 
 };
 
