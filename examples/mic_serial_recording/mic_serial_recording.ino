@@ -6,14 +6,14 @@
 #define SAMPLES 16000*3
 
 mic_config_t mic_config{
-  .mic_type = 0,                // 0 - DMA ADC MIC
   .channel_cnt = 1,
   .sampling_rate = 16000,
-  .buf_size = 1600,
+  .buf_size = 320,
   .adc_pin = ADC1,
   .debug_pin = 1                // Toggles each DAC ISR (if DEBUG is set to 1)
 };
 
+DMA_ADC_Class Mic(&mic_config);
 
 int16_t recording_buf[SAMPLES];
 volatile uint8_t recording = 0;
@@ -28,9 +28,9 @@ void setup() {
   
   pinMode(WIO_KEY_A, INPUT_PULLUP);
   
-  Mic.onReceive(audio_rec_callback);
+  Mic.setCallback(audio_rec_callback);
 
-  if (!Mic.begin(&mic_config)) {
+  if (!Mic.begin()) {
     Serial.println("init_fail");
     while (1);
   }

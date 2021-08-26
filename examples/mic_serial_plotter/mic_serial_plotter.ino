@@ -6,13 +6,14 @@
 #define SAMPLES 16000*3
 
 mic_config_t mic_config{
-  .mic_type = 0,                // 0 - DMA ADC MIC
   .channel_cnt = 1,
   .sampling_rate = 16000,
   .buf_size = 1600,
   .adc_pin = ADC1,
   .debug_pin = 1                // Toggles each DAC ISR (if DEBUG is set to 1)
 };
+
+DMA_ADC_Class Mic(&mic_config);
 
 int16_t recording_buf[SAMPLES];
 volatile uint8_t recording = 0;
@@ -26,12 +27,11 @@ void setup() {
   while (!Serial) {delay(10);}
   
   pinMode(WIO_KEY_A, INPUT_PULLUP);
-  
 
-  Mic.onReceive(audio_rec_callback);
+  Mic.setCallback(audio_rec_callback);
 
-  if (!Mic.begin(&mic_config)) {
-    Serial.println("Failed to start Mic!");
+  if (!Mic.begin()) {
+    Serial.println("Mic initialization failed");
     while (1);
   }
 
@@ -40,7 +40,7 @@ void setup() {
 }
 
 void loop() { 
-  
+
 if (digitalRead(WIO_KEY_A) == LOW && !recording) {
 
     Serial.println("Starting sampling");
@@ -64,7 +64,7 @@ if (digitalRead(WIO_KEY_A) == LOW && !recording) {
 }
 
 static void audio_rec_callback(uint16_t *buf, uint32_t buf_len) {
-
+  
   static uint32_t idx = 0;
   // Copy samples from DMA buffer to inference buffer
   if (recording) {
@@ -73,7 +73,7 @@ static void audio_rec_callback(uint16_t *buf, uint32_t buf_len) {
       // Convert 12-bit unsigned ADC value to 16-bit PCM (signed) audio value
       recording_buf[idx++] = filter.step((int16_t)(buf[i] - 1024) * 16);
       //recording_buf[idx++] = (int16_t)(buf[i] - 1024) * 16;  
-          
+
       if (idx >= SAMPLES){ 
       idx = 0;
       recording = 0;
@@ -82,4 +82,5 @@ static void audio_rec_callback(uint16_t *buf, uint32_t buf_len) {
      } 
     }
   }
+
 }
