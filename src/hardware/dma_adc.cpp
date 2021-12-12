@@ -1,5 +1,7 @@
 #include "dma_adc.h"
 
+#if defined(WIO_TERMINAL)
+
 volatile dmacdescriptor wrb[DMAC_CH_NUM] __attribute__ ((aligned (16)));          // Write-back DMAC descriptors
 dmacdescriptor descriptor_section[DMAC_CH_NUM] __attribute__ ((aligned (16)));    // DMAC channel descriptors
 dmacdescriptor descriptor __attribute__ ((aligned (16)));                         // Place holder descriptor
@@ -138,3 +140,5 @@ void DMAC_1_Handler() {
     }
   }
 }
+
+#endif

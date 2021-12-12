@@ -20,9 +20,10 @@
 
 #include <Arduino.h>
 #include "hardware/dma_adc.h"
+#include "hardware/nrf52840_adc.h"
 
-#if !defined(WIO_TERMINAL)
-#error "This library targets only Wio Terminal boards at the moment"
+#if !defined(WIO_TERMINAL) && !defined(ARDUINO_ARCH_NRF52840)
+#error "This library targets Wio Terminal boards and XIAO BLE at the moment"
 #endif
 
 #endif
