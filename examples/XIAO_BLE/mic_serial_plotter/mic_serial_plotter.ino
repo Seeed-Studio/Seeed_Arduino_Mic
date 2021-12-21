@@ -2,7 +2,7 @@
 
 // Settings
 #define DEBUG 1                 // Enable pin pulse during ISR  
-#define SAMPLES 1600
+#define SAMPLES 800
 
 mic_config_t mic_config{
   .channel_cnt = 1,

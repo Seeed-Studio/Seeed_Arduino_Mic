@@ -141,19 +141,25 @@ if (nrf_pdm_event_check(NRF_PDM_EVENT_STARTED)) {
     if (*NRF52840_ADC_Class::_debug_pin_ptr) 
         digitalWrite(*NRF52840_ADC_Class::_debug_pin_ptr, HIGH);
 
-    // See which buffer has filled up, and dump results into large buffer
+    // switch to fill
+	/*
+		Why use the _buf_size_ptr / 2 not only _buf_size_ptr ?
+		Because, we alloc the data buf use the uint16_t.But everytime the PDM
+		take sample,it will use 32 bits space in the data buf.So we need the /2.
+		Actually sizeof(uint32_t) / sizeof(uint16_t) = 2.
+	*/
     if (*NRF52840_ADC_Class::_buf_count_ptr) {
-        nrf_pdm_buffer_set((uint32_t*)(NRF52840_ADC_Class::buf_0_ptr), *NRF52840_ADC_Class::_buf_size_ptr);
+        nrf_pdm_buffer_set((uint32_t*)(NRF52840_ADC_Class::buf_0_ptr), *NRF52840_ADC_Class::_buf_size_ptr / 2);
         if(NRF52840_ADC_Class::_onReceive){
             NVIC_DisableIRQ(PDM_IRQn);
-            NRF52840_ADC_Class::_onReceive(NRF52840_ADC_Class::buf_1_ptr, *NRF52840_ADC_Class::_buf_size_ptr);
+            NRF52840_ADC_Class::_onReceive(NRF52840_ADC_Class::buf_1_ptr, *NRF52840_ADC_Class::_buf_size_ptr / 2);
             NVIC_EnableIRQ(PDM_IRQn);
         }
     } else {
-        nrf_pdm_buffer_set((uint32_t*)(NRF52840_ADC_Class::buf_1_ptr), *NRF52840_ADC_Class::_buf_size_ptr);
+        nrf_pdm_buffer_set((uint32_t*)(NRF52840_ADC_Class::buf_1_ptr), *NRF52840_ADC_Class::_buf_size_ptr / 2);
         if(NRF52840_ADC_Class::_onReceive){
             NVIC_DisableIRQ(PDM_IRQn);
-            NRF52840_ADC_Class::_onReceive(NRF52840_ADC_Class::buf_0_ptr, *NRF52840_ADC_Class::_buf_size_ptr);
+            NRF52840_ADC_Class::_onReceive(NRF52840_ADC_Class::buf_0_ptr, *NRF52840_ADC_Class::_buf_size_ptr / 2);
             NVIC_EnableIRQ(PDM_IRQn);
         }
     }

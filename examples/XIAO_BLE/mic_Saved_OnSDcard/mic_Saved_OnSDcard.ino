@@ -14,7 +14,7 @@ mic_config_t mic_config{
 
 NRF52840_ADC_Class Mic(&mic_config);
 
-short sampleBuffer[512];
+short sampleBuffer[256];
 short sampleBuffer1[SAMPLES] = {0};
 
 // Number of audio samples read
