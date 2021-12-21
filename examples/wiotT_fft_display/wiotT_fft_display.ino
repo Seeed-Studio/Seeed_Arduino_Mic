@@ -33,6 +33,10 @@
     THE SOFTWARE.
 */
 
+#if !defined(WIO_TERMINAL)
+#error "This demo targets Wio Terminal boards only at the moment"
+#endif
+
 #include "arduinoFFT.h"
 #include <TFT_eSPI.h>
 #include <mic.h>

@@ -1,3 +1,7 @@
+#if !defined(ARDUINO_ARCH_NRF52840)
+#error "This demo targets XIAO BLE only at the moment"
+#endif
+
 #include <mic.h>
 #include <Seeed_Arduino_FS.h>
 
