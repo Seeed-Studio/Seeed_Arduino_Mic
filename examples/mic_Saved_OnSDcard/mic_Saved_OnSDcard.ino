@@ -3,7 +3,7 @@
 #endif
 
 #include <mic.h>
-#include <Seeed_Arduino_FS.h>
+#include <SD.h>
 
 // Settings
 #define DEBUG 1                 // Enable pin pulse during ISR  
