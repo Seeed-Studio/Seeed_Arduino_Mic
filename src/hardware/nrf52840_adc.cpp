@@ -1,5 +1,4 @@
 #include "nrf52840_adc.h"
-
 #if defined(ARDUINO_ARCH_NRF52840)
 
 #include <hal/nrf_pdm.h>
