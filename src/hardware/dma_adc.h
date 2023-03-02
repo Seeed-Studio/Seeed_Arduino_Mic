@@ -36,10 +36,10 @@ public:
     using MicClass::MicClass;
     virtual ~DMA_ADC_Class();
 
-    uint8_t begin();
-    void end();
-    void pause();
-    void resume();
+    uint8_t begin() override;
+    void end() override;
+    void pause() override;
+    void resume() override;
     void set_callback(void(*function)(uint16_t *buf, uint32_t buf_len));
 
 };

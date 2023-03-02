@@ -1,5 +1,12 @@
 #include "base_mic.h"
 
+MicClass::RxCallback MicClass::_onReceive{NULL};
+uint8_t * MicClass::_buf_count_ptr = NULL;
+uint32_t * MicClass::_buf_size_ptr = NULL;
+uint16_t * MicClass::buf_0_ptr = NULL;
+uint16_t * MicClass::buf_1_ptr = NULL;
+uint8_t * MicClass::_debug_pin_ptr = NULL;
+
 MicClass::MicClass(mic_config_t *mic_config)
 {
 
@@ -36,26 +43,6 @@ MicClass::~MicClass()
   delete buf_1;
 }
 
-uint8_t MicClass::begin()
-{
-//TO BE DEFINED IN HARDWARE CHILD CLASS
-}
-
-void MicClass::end()
-{
-//TO BE DEFINED IN HARDWARE CHILD CLASS
-}
-
-void MicClass::resume()
-{
-//TO BE DEFINED IN HARDWARE CHILD CLASS
-}
-
-void MicClass::pause()
-{
-//TO BE DEFINED IN HARDWARE CHILD CLASS
-}
-
 int MicClass::available()
 {
   pause();
@@ -82,10 +69,10 @@ int MicClass::read(void* buffer, uint8_t buf_count, size_t size)
   return -1;
 }
 
-void MicClass::set_callback(void(*function)(uint16_t *buf, uint32_t buf_len))
+void MicClass::set_callback(const RxCallback cb)
 {
 
-  _onReceive = function;
+  _onReceive = cb;
 
 }
 
