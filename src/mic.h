@@ -21,8 +21,9 @@
 #include <Arduino.h>
 #include "hardware/dma_adc.h"
 #include "hardware/nrf52840_adc.h"
+#include "hardware/mg24_adc.h"
 
-#if !defined(WIO_TERMINAL) && !defined(ARDUINO_ARCH_NRF52840)
+#if !defined(WIO_TERMINAL) && !defined(ARDUINO_ARCH_NRF52840) && !defined(ARDUINO_SILABS)
 #error "This library targets Wio Terminal boards and XIAO BLE at the moment"
 #endif
 
