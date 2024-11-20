@@ -10,10 +10,10 @@ public:
     using MicClass::MicClass;
     virtual ~NRF52840_ADC_Class();
 
-    uint8_t begin() override;
-    void end() override;
-    void pause() override;
-    void resume() override;
+    uint8_t begin();
+    void end();
+    void pause();
+    void resume();
 
     //PORTENTA_H7 min -12 max 51
     //NANO 33 BLE SENSe min 0 max 80
