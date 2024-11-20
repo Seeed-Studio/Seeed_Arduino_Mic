@@ -42,7 +42,7 @@ public:
  * @return 0 if successfull, ERROR CODE if failed. Generic ERROR is 0.
  *
  */
-  virtual uint8_t begin() = 0;
+  uint8_t begin();
 
 /**
  * Deinitialize the microphone and permanently stop sound recording 
@@ -52,26 +52,25 @@ public:
  * @return 0 if successfull, ERROR CODE if failed. Generic ERROR is 0.
  *
  */
-  virtual void end() = 0;
+  void end();
 
 /**
  * Pause sound transfer from ADC buffer to user defined callback. 
  * Designed for temporary stopping sound collection.
  */  
-  virtual void pause() = 0;
+  void pause();
 
  /**
  * Resume sound transfer from ADC buffer to user defined callback. 
  */ 
-  virtual void resume() = 0;
+  void resume();
 
  /**
  * Must be called before begin() method. Sets user-defined function to
  * to execute every time one of ADC buffers is filled and need to be
  * copied.
  */ 
-  typedef void (*RxCallback)(uint16_t *buf, uint32_t buf_len);
-  static void set_callback(RxCallback cb);
+  void set_callback(void(*function)(uint16_t *buf, uint32_t buf_len));
 
 /**
  * NOT IMPLEMENTED. Blocking method for getting number of bytes in
@@ -94,12 +93,13 @@ public:
   uint16_t *buf_0;    // ADC results array 0
   uint16_t *buf_1;    // ADC results array 1
 
-  static uint8_t *_buf_count_ptr;
-  static uint32_t *_buf_size_ptr;
-  static uint16_t *buf_0_ptr;
-  static uint16_t *buf_1_ptr;
-  static uint8_t *_debug_pin_ptr;
-  static RxCallback _onReceive;
+  inline static uint8_t *_buf_count_ptr = NULL;
+  inline static uint32_t *_buf_size_ptr = NULL;
+  inline static uint16_t *buf_0_ptr = NULL;
+  inline static uint16_t *buf_1_ptr = NULL;
+  inline static uint8_t *_debug_pin_ptr = NULL;
+
+  inline static void (*_onReceive)(uint16_t *buf, uint32_t buf_len) = NULL;
 
 protected:
   uint8_t _channel_cnt = 1;
