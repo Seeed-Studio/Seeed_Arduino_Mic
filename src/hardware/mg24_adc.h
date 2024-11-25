@@ -15,7 +15,28 @@
 #include <cstring>
 
 #define NUM_SAMPLES 250
+
+#define ADC_FREQ                16000//The sampling frequency can be set to either 8000 or 16000.
+
+#define CLK_SRC_ADC_FREQ        20000000
+#define CLK_ADC_FREQ            10000000
+#define IADC_INPUT_0_PORT_PIN   iadcPosInputPortCPin9
+#define IADC_INPUT_0_BUS        CDBUSALLOC
+#define IADC_INPUT_0_BUSALLOC   GPIO_CDBUSALLOC_CDODD1_ADC0
+#define IADC_LDMA_CH            0
+#define PRS_CHANNEL             0
+
+#if ADC_FREQ == 16000
+#define LETIMER_FREQ            20000
+#define DATACONST               66
 #define NUM_SAMPLES1 50000
+#elif ADC_FREQ == 8000
+#define LETIMER_FREQ            9000
+#define DATACONST               33
+#define NUM_SAMPLES1 25000
+#else
+#error "Unsupported LETIMER_FREQ value!"
+#endif
 
 class MG24_ADC {
 public:
@@ -23,6 +44,7 @@ public:
     uint32_t *buffer1;
     int index;
     volatile int dataCount;
+    int dataconst;
 
     MG24_ADC(uint32_t *buffer, uint32_t *buffer1);
     void initADC();

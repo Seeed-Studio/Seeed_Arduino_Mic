@@ -1,33 +1,37 @@
+#if !defined(ARDUINO_SILABS)
+    #error "This demo targets XIAO MG24 (Sense) only at the moment"
+#endif
 
 #include <mic.h>
 #include <SD.h>
 
+#define SD_USE                  0 // 1: Save to SD card, 2: Do not use SD card
+#define UART_OUTPUT             1
 uint32_t singleBuffer[NUM_SAMPLES];
 uint32_t singleBuffer1[NUM_SAMPLES1];
 MG24_ADC adc(singleBuffer, singleBuffer1);
-
 File audioFile;
-int dataconst = 66;
 
 void setup() {
     Serial.begin(921600);
-    Serial.println("aaa");
+    Serial.println("begin");
+    delay(100);
     adc.start();
 }
 
 void loop() {
-  //Serial.println("aaa");
     if (adc.dataReady()) {
-      Serial.println("ok");
+        Serial.println("ok");
+        if (SD_USE) {
             if (!SD.begin(D2)) {
-                Serial.println("SD卡初始化失败！");
+                Serial.println("SD card initialization failed!");
                 return;
             }
 
             String fileName = "audio.wav";
             int fileIndex = 1;
 
-            // 检查文件是否存在，若存在则更改文件名
+            // Check if the file exists, and if it does, rename it.
             while (SD.exists(fileName)) {
                 fileName = "audio_" + String(fileIndex) + ".wav";
                 fileIndex++;
@@ -35,29 +39,34 @@ void loop() {
 
             audioFile = SD.open(fileName, FILE_WRITE);
             if (!audioFile) {
-                Serial.println("无法创建文件！");
+                Serial.println("Unable to create the file!");
                 return;
             }
 
-            writeWavHeader(audioFile, 16000, 3);
-            int totalSamples = NUM_SAMPLES * dataconst * 3;
-            for (int i = 0; i < NUM_SAMPLES * dataconst * 3; i++) {
-                int adcValue = singleBuffer1[i] ;
+            writeWavHeader(audioFile, ADC_FREQ, 3);
+            int totalSamples = NUM_SAMPLES * DATACONST * 3;
+
+            for (int i = 0; i < NUM_SAMPLES * DATACONST * 3; i++) {
+                int adcValue = singleBuffer1[i];
                 audioFile.write(adcValue & 0xFF);
                 audioFile.write((adcValue >> 8) & 0xFF);
-                Serial.println(i);
+                Serial.println(adcValue);
             }
 
             updateWavHeader(audioFile, totalSamples);
             audioFile.close();
-            Serial.println("音频文件创建成功！");
+            Serial.println("Audio file created successfully!");
 
-        adc.resetData();
+            adc.resetData();
+        } else {
+            for (int i = 0; i < NUM_SAMPLES * DATACONST * 3; i++) {
+                Serial.println(singleBuffer1[i]);
+            }
+            adc.resetData();
+        }
+        delay(100);
     }
-    delay(100);
 }
-
-
 
 void writeWavHeader(File &file, int sampleRate, int duration) {
     file.write("RIFF", 4);

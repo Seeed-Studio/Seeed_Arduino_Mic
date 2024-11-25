@@ -1,24 +1,5 @@
-#include "mg24_adc.h"
 #if defined(ARDUINO_SILABS)
-
-#define CLK_SRC_ADC_FREQ        20000000
-#define CLK_ADC_FREQ            10000000
-#define IADC_INPUT_0_PORT_PIN   iadcPosInputPortCPin9
-#define IADC_INPUT_0_BUS        CDBUSALLOC
-#define IADC_INPUT_0_BUSALLOC   GPIO_CDBUSALLOC_CDODD1_ADC0
-#define IADC_LDMA_CH            0
-#define PRS_CHANNEL             0
-#define ADC_FREQ                16000
-
-#if ADC_FREQ == 16000
-#define LETIMER_FREQ            20000
-#define DATACONST               66
-#elif ADC_FREQ == 8000
-#define LETIMER_FREQ            9000
-#define DATACONST               33
-#else
-#error "Unsupported LETIMER_FREQ value!"
-#endif
+#include "mg24_adc.h"
 
 LDMA_Descriptor_t descriptor;
 static MG24_ADC *adc_instance = nullptr;
@@ -93,6 +74,7 @@ void MG24_ADC::initLDMA(uint32_t size) {
 }
 
 void MG24_ADC::start() {
+    dataconst = DATACONST;
     initPRS();
     initADC();
     initLDMA(NUM_SAMPLES);
