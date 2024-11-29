@@ -10,6 +10,9 @@
 #elif defined(ARDUINO_ARCH_NRF52840)
 #define DEBUG 1                 // Enable pin pulse during ISR  
 #define SAMPLES 1600
+#elif defined(ARDUINO_SILABS)
+#define DEBUG 1
+#define SAMPLES NUM_SAMPLES1
 #endif
 
 mic_config_t mic_config{
@@ -26,11 +29,17 @@ mic_config_t mic_config{
 
 #if defined(WIO_TERMINAL)
 DMA_ADC_Class Mic(&mic_config);
+int16_t recording_buf[SAMPLES];
 #elif defined(ARDUINO_ARCH_NRF52840)
 NRF52840_ADC_Class Mic(&mic_config);
+int16_t recording_buf[SAMPLES];
+#elif defined(ARDUINO_SILABS)
+uint32_t singleBuffer[NUM_SAMPLES];
+uint32_t recording_buf[NUM_SAMPLES1];
+MG24_ADC Mic(singleBuffer,recording_buf);
 #endif
 
-int16_t recording_buf[SAMPLES];
+
 volatile uint8_t recording = 0;
 volatile static bool record_ready = false;
 
@@ -39,8 +48,11 @@ FilterBuHp filter;
 #endif
 
 void setup() {
-
+#if defined(ARDUINO_SILABS)
+  Serial.begin(921600);
+#else
   Serial.begin(57600);
+#endif
   while (!Serial) {delay(10);}
 
 #if defined(WIO_TERMINAL)
@@ -70,20 +82,29 @@ if (resp == "rec\n" && !recording) {
 
     recording = 1;
     record_ready = false;  
+    #if defined(ARDUINO_SILABS)
+    Mic.begin();
+    #endif
 }
 
+  #if defined(ARDUINO_SILABS)
+  if (Mic.dataReady() && recording)
+  #else
   if (!recording && record_ready)
+  #endif
   {
-    
   Serial.println("rec_ok");
   for (int i = 0; i < SAMPLES; i++) {
     
   Serial.println(recording_buf[i]);
 
   }
-
   Serial.println("fi");
   record_ready = false; 
+  #if defined(ARDUINO_SILABS)
+  recording = 0;
+  Mic.resetData();
+  #endif 
   }
 }
 

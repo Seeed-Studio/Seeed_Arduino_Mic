@@ -23,20 +23,21 @@
 #define IADC_INPUT_0_PORT_PIN   iadcPosInputPortCPin9
 #define IADC_INPUT_0_BUS        CDBUSALLOC
 #define IADC_INPUT_0_BUSALLOC   GPIO_CDBUSALLOC_CDODD1_ADC0
-#define IADC_LDMA_CH            0
-#define PRS_CHANNEL             0
+#define IADC_LDMA_CH            1
+#define PRS_CHANNEL             1
 
 #if ADC_FREQ == 16000
 #define LETIMER_FREQ            20000
 #define DATACONST               66
-#define NUM_SAMPLES1 50000
+#define NUM_SAMPLES1 49500
 #elif ADC_FREQ == 8000
 #define LETIMER_FREQ            9000
 #define DATACONST               33
-#define NUM_SAMPLES1 25000
+#define NUM_SAMPLES1 24750
 #else
 #error "Unsupported LETIMER_FREQ value!"
 #endif
+
 
 class MG24_ADC {
 public:
@@ -51,15 +52,15 @@ public:
     void initPRS();
     void initLETIMER();
     void initLDMA(uint32_t size);
-    void start();
+    uint8_t begin();
     void resetData();
     bool dataReady();
+    void set_callback(void(*function)(uint16_t *buf, uint32_t buf_len));
+
 
 private:
-    // uint32_t *buffer;
-    // uint32_t *buffer1;
-    // int index;
-    // volatile int dataCount;
+void (*_onReceive)(uint16_t *buf, uint32_t buf_len);  
+
 };
 
 #endif

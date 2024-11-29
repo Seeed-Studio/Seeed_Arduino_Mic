@@ -73,12 +73,18 @@ void MG24_ADC::initLDMA(uint32_t size) {
     LDMA_StartTransfer(IADC_LDMA_CH, &transferCfg, &descriptor);
 }
 
-void MG24_ADC::start() {
-    dataconst = DATACONST;
-    initPRS();
-    initADC();
-    initLDMA(NUM_SAMPLES);
-    initLETIMER();
+uint8_t MG24_ADC::begin() {
+     resetData();
+     dataconst = DATACONST;
+     initPRS();
+     initADC();
+     initLDMA(NUM_SAMPLES);
+     initLETIMER();
+    return 1;
+}
+
+void MG24_ADC::set_callback(void(*function)(uint16_t *buf, uint32_t buf_len)) {
+    _onReceive = function;  
 }
 
 void MG24_ADC::resetData() {
@@ -102,6 +108,8 @@ extern "C" {
                 adc_instance->index += NUM_SAMPLES;
             } else {
                 LDMA_StopTransfer(IADC_LDMA_CH);
+                LETIMER_IntDisable(LETIMER0, false); 
+                CMU_ClockEnable(cmuClock_PRS, false);
                 adc_instance->index = 0;
                 std::memcpy(&adc_instance->buffer[adc_instance->index], adc_instance->buffer, NUM_SAMPLES * sizeof(uint32_t));
                 adc_instance->index += NUM_SAMPLES;

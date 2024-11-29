@@ -16,7 +16,7 @@ void setup() {
     Serial.begin(921600);
     Serial.println("begin");
     delay(100);
-    adc.start();
+    adc.begin();
 }
 
 void loop() {

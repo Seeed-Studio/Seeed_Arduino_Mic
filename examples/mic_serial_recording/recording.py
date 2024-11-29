@@ -3,6 +3,7 @@ import serial
 import wave, struct
 import logging
 import argparse
+import time
 
 logging.basicConfig(level=logging.INFO)
 
@@ -46,6 +47,8 @@ def main(args):
             logging.info('READY') 
 
             input("Press Enter to continue...")
+            ser.write(b"!\n")
+            time.sleep(1)
             ser.write(b"rec\n")
             logging.info('RECORDING')  
             recv = ""
