@@ -2,6 +2,7 @@
 #define MG24_ADC_H
 #if defined(ARDUINO_SILABS)
 
+#include "base_mic.h"
 #include "em_device.h"
 #include "em_chip.h"
 #include "em_core.h"
@@ -23,22 +24,24 @@
 #define IADC_INPUT_0_PORT_PIN   iadcPosInputPortCPin9
 #define IADC_INPUT_0_BUS        CDBUSALLOC
 #define IADC_INPUT_0_BUSALLOC   GPIO_CDBUSALLOC_CDODD1_ADC0
-#define IADC_LDMA_CH            0
-#define PRS_CHANNEL             0
+#define IADC_LDMA_CH            1
+#define PRS_CHANNEL             1
 
 #if ADC_FREQ == 16000
 #define LETIMER_FREQ            20000
 #define DATACONST               66
-#define NUM_SAMPLES1 50000
+#define NUM_SAMPLES1 16000 * 3
 #elif ADC_FREQ == 8000
 #define LETIMER_FREQ            9000
 #define DATACONST               33
-#define NUM_SAMPLES1 25000
+#define NUM_SAMPLES1 8000 * 3
 #else
 #error "Unsupported LETIMER_FREQ value!"
 #endif
 
-class MG24_ADC {
+
+class MG24_ADC 
+{
 public:
     uint32_t *buffer;
     uint32_t *buffer1;
@@ -51,15 +54,22 @@ public:
     void initPRS();
     void initLETIMER();
     void initLDMA(uint32_t size);
-    void start();
+    uint8_t begin();
+    void end();
+    void pause();
+    void resume();
     void resetData();
     bool dataReady();
+    void (*getOnReceive())(uint16_t *buf, uint32_t buf_len) {
+        return _onReceive;
+    }
+    void set_callback(void(*function)(uint16_t *buf, uint32_t buf_len));
+    void (*_onReceive)(uint16_t *buf, uint32_t buf_len);  
+
 
 private:
-    // uint32_t *buffer;
-    // uint32_t *buffer1;
-    // int index;
-    // volatile int dataCount;
+
+
 };
 
 #endif
