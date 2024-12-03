@@ -83,6 +83,27 @@ uint8_t MG24_ADC::begin() {
     return 1;
 }
 
+void MG24_ADC::end() {
+    LETIMER_Enable(LETIMER0, false);
+    LDMA_StopTransfer(IADC_LDMA_CH);
+    CMU_ClockEnable(cmuClock_LETIMER0, false);
+    CMU_ClockEnable(cmuClock_IADC0, false);
+    CMU_ClockEnable(cmuClock_PRS, false);
+    adc_instance = nullptr;
+}
+
+void MG24_ADC::pause() {
+    LETIMER_Enable(LETIMER0, false);
+    LDMA_StopTransfer(IADC_LDMA_CH);
+}
+
+void MG24_ADC::resume() {
+     LDMA_TransferCfg_t transferCfg = LDMA_TRANSFER_CFG_PERIPHERAL(ldmaPeripheralSignal_IADC0_IADC_SINGLE);
+    LETIMER_Enable(LETIMER0, true);
+     descriptor = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_LINKREL_P2M_WORD(&IADC0->SINGLEFIFODATA, buffer, NUM_SAMPLES, 0);
+    LDMA_StartTransfer(IADC_LDMA_CH, &transferCfg, &descriptor);
+}
+
 void MG24_ADC::set_callback(void(*function)(uint16_t *buf, uint32_t buf_len)) {
     _onReceive = function;  
 }
@@ -107,16 +128,25 @@ extern "C" {
                 std::memcpy(&adc_instance->buffer1[adc_instance->index], adc_instance->buffer, NUM_SAMPLES * sizeof(uint32_t));
                 adc_instance->index += NUM_SAMPLES;
             } else {
-                LDMA_StopTransfer(IADC_LDMA_CH);
-                LETIMER_IntDisable(LETIMER0, false); 
-                CMU_ClockEnable(cmuClock_PRS, false);
+                if (adc_instance->dataReady()) {
+                // Get the callback function using the new method
+                auto onReceive = adc_instance->getOnReceive();
+                if (onReceive != nullptr) {
+                    onReceive(reinterpret_cast<uint16_t*>(adc_instance->buffer1), NUM_SAMPLES1);
+                }
+
+                // Reset data after processing
+                //adc_instance->resetData();
+            } 
                 adc_instance->index = 0;
                 std::memcpy(&adc_instance->buffer[adc_instance->index], adc_instance->buffer, NUM_SAMPLES * sizeof(uint32_t));
                 adc_instance->index += NUM_SAMPLES;
             }
             adc_instance->dataCount++;
+            
         }
     }
 }
+
 
 #endif
