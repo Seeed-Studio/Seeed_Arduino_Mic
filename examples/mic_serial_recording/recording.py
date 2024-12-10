@@ -86,7 +86,7 @@ if __name__ == '__main__':
     argparser.add_argument(
         '-b',
         '--baud_rate',
-        default=57600,
+        default=115200,
         help='Connection baud rate')
 
     argparser.add_argument(
