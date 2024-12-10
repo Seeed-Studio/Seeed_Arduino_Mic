@@ -24,7 +24,7 @@
 #include "hardware/mg24_adc.h"
 
 #if !defined(WIO_TERMINAL) && !defined(ARDUINO_ARCH_NRF52840) && !defined(ARDUINO_SILABS)
-#error "This library targets Wio Terminal boards and XIAO BLE at the moment"
+#error "This library targets Wio Terminal boards, XIAO BLE and XIAO MG24 at the moment"
 #endif
 
 #endif

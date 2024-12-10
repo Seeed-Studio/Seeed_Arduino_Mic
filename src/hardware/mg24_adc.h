@@ -1,7 +1,9 @@
 #ifndef MG24_ADC_H
 #define MG24_ADC_H
+
 #if defined(ARDUINO_SILABS)
 
+#include "base_mic.h"
 #include "em_device.h"
 #include "em_chip.h"
 #include "em_core.h"
@@ -14,52 +16,61 @@
 #include <cstdint>
 #include <cstring>
 
-#define NUM_SAMPLES 250
-
-#define ADC_FREQ                16000//The sampling frequency can be set to either 8000 or 16000.
 
 #define CLK_SRC_ADC_FREQ        20000000
 #define CLK_ADC_FREQ            10000000
 #define IADC_INPUT_0_PORT_PIN   iadcPosInputPortCPin9
 #define IADC_INPUT_0_BUS        CDBUSALLOC
 #define IADC_INPUT_0_BUSALLOC   GPIO_CDBUSALLOC_CDODD1_ADC0
-#define IADC_LDMA_CH            0
-#define PRS_CHANNEL             0
+#define IADC_LDMA_CH            1
+#define PRS_CHANNEL             1
+#define ADCFREQ                 16000       
 
-#if ADC_FREQ == 16000
-#define LETIMER_FREQ            20000
-#define DATACONST               66
-#define NUM_SAMPLES1 50000
-#elif ADC_FREQ == 8000
-#define LETIMER_FREQ            9000
-#define DATACONST               33
-#define NUM_SAMPLES1 25000
-#else
-#error "Unsupported LETIMER_FREQ value!"
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-class MG24_ADC {
+extern void LDMA_IRQHandler_use();
+
+#ifdef __cplusplus
+}
+#endif
+
+class MG24_ADC_Class : public MicClass 
+{
 public:
+    using MicClass::MicClass;
+    virtual ~MG24_ADC_Class();
+    uint32_t getBufferSize() const {
+        return _buf_size;
+    }
+    void initPRS();
+    void initADC();    
+    void initLETIMER();
+    void initLDMA(uint16_t *buffer, uint32_t size);
+
+    uint8_t begin();
+    void end();
+    void pause();
+    void resume();
+
     uint32_t *buffer;
     uint32_t *buffer1;
     int index;
     volatile int dataCount;
     int dataconst;
+    uint32_t adc_freq;
+    uint32_t num_samples1;
+    uint32_t NUM_SAMPLES;
+    uint32_t letimer_freq;
 
-    MG24_ADC(uint32_t *buffer, uint32_t *buffer1);
-    void initADC();
-    void initPRS();
-    void initLETIMER();
-    void initLDMA(uint32_t size);
-    void start();
-    void resetData();
-    bool dataReady();
+    void set_callback(void(*function)(uint16_t *buf, uint32_t buf_len));
+
+    void (*_onReceive)(uint16_t *buf, uint32_t buf_len);
+
 
 private:
-    // uint32_t *buffer;
-    // uint32_t *buffer1;
-    // int index;
-    // volatile int dataCount;
+int dataConst;
 };
 
 #endif
