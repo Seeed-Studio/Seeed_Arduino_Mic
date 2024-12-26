@@ -10,7 +10,7 @@
 #elif defined(ARDUINO_ARCH_NRF52840)
 #define DEBUG 1                 // Enable pin pulse during ISR  
 #define SAMPLES 800
-#elif defined(ARDUINO_SILABS)
+#elif defined(ARDUINO_XIAO_MG24)
 #define DEBUG 1                 // Enable pin pulse during ISR  
 #define SAMPLES 800
 #endif
@@ -23,7 +23,7 @@ mic_config_t mic_config{
   .debug_pin = 1                // Toggles each DAC ISR (if DEBUG is set to 1)
 #elif defined(ARDUINO_ARCH_NRF52840)
   .debug_pin = LED_BUILTIN                // Toggles each DAC ISR (if DEBUG is set to 1)
-#elif defined(ARDUINO_SILABS)
+#elif defined(ARDUINO_XIAO_MG24)
   .debug_pin = LED_BUILTIN                // Toggles each DAC ISR (if DEBUG is set to 1)  
 #endif
 };
@@ -32,7 +32,7 @@ mic_config_t mic_config{
 DMA_ADC_Class Mic(&mic_config);
 #elif defined(ARDUINO_ARCH_NRF52840)
 NRF52840_ADC_Class Mic(&mic_config);
-#elif defined(ARDUINO_SILABS)
+#elif defined(ARDUINO_XIAO_MG24)
 MG24_ADC_Class Mic(&mic_config);
 #endif
 
@@ -77,7 +77,7 @@ if (digitalRead(WIO_KEY_A) == LOW && !recording) {
 
 #if defined(WIO_TERMINAL)  
   if (!recording && record_ready)
-#elif defined(ARDUINO_ARCH_NRF52840) || defined(ARDUINO_SILABS)
+#elif defined(ARDUINO_ARCH_NRF52840) || defined(ARDUINO_XIAO_MG24)
   if (record_ready)
 #endif  
   {
@@ -107,7 +107,7 @@ static void audio_rec_callback(uint16_t *buf, uint32_t buf_len) {
 #if defined(WIO_TERMINAL)
       recording_buf[idx++] = filter.step((int16_t)(buf[i] - 1024) * 16);
       //recording_buf[idx++] = (int16_t)(buf[i] - 1024) * 16;  
-#elif defined(ARDUINO_ARCH_NRF52840) || defined(ARDUINO_SILABS)
+#elif defined(ARDUINO_ARCH_NRF52840) || defined(ARDUINO_XIAO_MG24)
       recording_buf[idx++] = buf[i];
 #endif
 

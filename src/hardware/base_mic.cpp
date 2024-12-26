@@ -38,6 +38,7 @@ MicClass::~MicClass()
 
 uint8_t MicClass::begin()
 {
+  return 1;
 //TO BE DEFINED IN HARDWARE CHILD CLASS
 }
 
